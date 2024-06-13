@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "82713197254",
+    "project_id": "merahisab-9bac1",
+    "storage_bucket": "merahisab-9bac1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:82713197254:android:744eb20812de041a95b5c7",
+        "android_client_info": {
+          "package_name": "com.merahisab"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "82713197254-ag7a7lfsn2gqt8gh9jkr4vb4e76p8dkb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.merahisab",
+            "certificate_hash": "aa6f644bffc5e95322cff09f7086dbe604512859"
+          }
+        },
+        {
+          "client_id": "82713197254-kv2jge5gh4sbbqh4lsm3fqo4ghoc1737.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.merahisab",
+            "certificate_hash": "71da961ea14bcbf7c1118c1430daa56ce12af4e9"
+          }
+        },
+        {
+          "client_id": "82713197254-e0hnnvabnqgh8fh9dpp5h6p3bkbogaqv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABpqcucPWkFvVrHQj5TLn1pU9QbL01C3Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "82713197254-e0hnnvabnqgh8fh9dpp5h6p3bkbogaqv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
