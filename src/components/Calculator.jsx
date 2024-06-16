@@ -1,98 +1,136 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
-import { Button } from 'react-native-paper';
+import {View, StyleSheet} from 'react-native';
+import React, {useRef,useState, useCallback} from 'react';
+import BottomSheet, {BottomSheetView,BottomSheetBackdrop} from '@gorhom/bottom-sheet';
+import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
+import { Button, Text, TextInput, Provider as PaperProvider, useTheme } from 'react-native-paper';
 
-const Calculator = ({ open, onClose }) => {
-  const [input, setInput] = useState('');
-  const [result, setResult] = useState(null);
+const CalculatorBottomSheet = ({initial,open, setOpen, setResult}) => {
+  const ref = useRef(null);
+  const [input, setInput] = useState(initial);
+  const theme  =  useTheme()
+
+  const handleSheetChange = useCallback(index => {
+    console.log('handleSheetChange', index);
+
+    if (index === -1) {
+      setOpen(false);
+    }
+  });
 
   const handlePress = (value) => {
     if (value === '=') {
       try {
-        setResult(eval(input));
-      } catch (error) {
-        setResult('Error');
+        setInput(eval(input).toString());
+      } catch (e) {
+        setInput('Error');
       }
     } else if (value === 'C') {
       setInput('');
-      setResult(null);
-    } else {
-      setInput(input + value);
+    }else if (value === 'DEL') {
+      setInput(input.slice(0, -1));
+    }else if (value === '✓') {
+      try {
+        const output = eval(input);
+        setInput(output.toString());
+        setResult('amount',output)
+        ref.current.close()
+      } catch (e) {
+        setInput('Error');
+      }
+      
+    }
+    else {
+      setInput((prev) => prev + value);
     }
   };
 
+
+  const renderBackdrop  = useCallback(
+    (props) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.1}
+      />
+    ),
+    []    
+  )
   return (
-    <Modal
-      visible={open}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalBackground}>
+    <BottomSheet
+      ref={ref}
+      backgroundStyle={{backgroundColor:theme.colors.surface}}
+      handleIndicatorStyle={{backgroundColor:theme.colors.primary}}
+      onChange={handleSheetChange}
+      snapPoints={[450]}
+      index={open ? 0 : -1}
+      enablePanDownToClose={true}
+      backdropComponent = {renderBackdrop}
+      >
         <View style={styles.container}>
-          <Text style={styles.display}>
-            {result !== null ? result : input}
-          </Text>
-          <View style={styles.row}>
-            {['7', '8', '9', '/'].map((val) => (
-              <Button key={val} style={styles.button} onPress={() => handlePress(val)}>{val}</Button>
-            ))}
-          </View>
-          <View style={styles.row}>
-            {['4', '5', '6', '*'].map((val) => (
-              <Button key={val} style={styles.button} onPress={() => handlePress(val)}>{val}</Button>
-            ))}
-          </View>
-          <View style={styles.row}>
-            {['1', '2', '3', '-'].map((val) => (
-              <Button key={val} style={styles.button} onPress={() => handlePress(val)}>{val}</Button>
-            ))}
-          </View>
-          <View style={styles.row}>
-            {['0', '.', '=', '+'].map((val) => (
-              <Button key={val} style={styles.button} onPress={() => handlePress(val)}>{val}</Button>
-            ))}
-          </View>
-          <View style={styles.row}>
-            <Button style={styles.button} onPress={() => handlePress('C')}>C</Button>
-            <Button style={styles.button} onPress={onClose}>Close</Button>
-          </View>
+        <TextInput
+          mode="outlined"
+          label="Input"
+          value={'₹ '+input}
+          style={styles.input}
+          disabled
+          error={input === 'Error'}
+          textColor='green'
+        />
+        <View style={styles.row}>
+          {[
+             { key: 'AC', value: 'C' },
+             { key: '÷', value: '/' },
+             { key: 'X', value: '*' },
+             { key: 'DEL', value: 'DEL' },
+          ].map((item) => (
+            <Button key={item.key} mode="contained" onPress={() => handlePress(item.value)} style={styles.button}>{item.key}</Button>
+          ))}
+        </View>
+        <View style={styles.row}>
+          {['7', '8', '9', '*'].map((val) => (
+            <Button key={val} mode="contained" onPress={() => handlePress(val)} style={styles.button}>{val}</Button>
+          ))}
+        </View>
+        <View style={styles.row}>
+          {['4', '5', '6', '-'].map((val) => (
+            <Button key={val} mode="contained" onPress={() => handlePress(val)} style={styles.button}>{val}</Button>
+          ))}
+        </View>
+        <View style={styles.row}>
+          {['1', '2', '3', '+'].map((val) => (
+            <Button key={val} mode="contained" onPress={() => handlePress(val)} style={styles.button}>{val}</Button>
+          ))}
+        </View>
+        <View style={styles.row}>
+          {['0', '.', '=','✓'].map((val) => (
+            <Button key={val} mode="contained-tonal" onPress={() => handlePress(val)} style={styles.button}>{val}</Button>
+          ))}
         </View>
       </View>
-    </Modal>
+    </BottomSheet>
   );
 };
 
+
 const styles = StyleSheet.create({
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.2)',
-  },
   container: {
-    width: '100%',
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
+    flex: 1,
+    justifyContent: 'center',
+    padding: 16,
+    paddingHorizontal: 20,
   },
-  display: {
-    fontSize: 30,
+  input: {
     marginBottom: 20,
-    textAlign: 'right',
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 5,
+    marginBottom: 10,
   },
   button: {
     flex: 1,
     margin: 5,
   },
 });
-
-export default Calculator;
+export default CalculatorBottomSheet;

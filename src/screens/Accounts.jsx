@@ -41,7 +41,8 @@ const ViewAccounts = () => {
     dispatch(fetchAccountsThunk());
   }, [dispatch]);
 
-  console.log('accoutn are here', groupedAccounts);
+  console.log('accounts', accounts);
+
 
   return (
     <View style={{flex: 1, paddingHorizontal: 15}}>
@@ -63,13 +64,13 @@ const ViewAccounts = () => {
         keyExtractor={item => item.id.toString()}
         renderItem={({item}) => {
           // const accountSummary = groupedAccounts[item.id] || { totalIncome: 0, totalExpense: 0 };
+          console.log('groupedAccounts', groupedAccounts);
           const accountSummary = (groupedAccounts &&
             groupedAccounts[item.id]) || {
             totalIncome: 0,
             totalExpense: 0,
             total: 0,
           };
-          console.log('account summary is ', accountSummary);
           return (
             <TouchableOpacity
               style={styles.list}

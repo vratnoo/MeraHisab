@@ -1,10 +1,11 @@
 import {View, Text, StyleSheet} from 'react-native';
 import React, {useRef, useCallback} from 'react';
-import BottomSheet, {BottomSheetView} from '@gorhom/bottom-sheet';
+import BottomSheet, {BottomSheetView,BottomSheetBackdrop} from '@gorhom/bottom-sheet';
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import { Button } from 'react-native-paper';
+import { transType } from '../store/reducers/transactionReducer';
 
-const AccountBottomSheet = ({open, setOpen, accounts, selectedAccount,setselectedAccount}) => {
+const AccountBottomSheet = ({type,open, setOpen, accounts, selectedAccount,setselectedAccount}) => {
   const ref = useRef(null);
 
   const handleSheetChange = useCallback(index => {
@@ -16,9 +17,29 @@ const AccountBottomSheet = ({open, setOpen, accounts, selectedAccount,setselecte
   });
 
   const handleSelectAccount =  (accountId)=>{
-    setselectedAccount('accountId',accountId);
+
+    console.log("handleSelectAccount",accountId)
+    if(type===transType.TRANSFER){
+      setselectedAccount('toAccountId',accountId);  
+    }else{
+      setselectedAccount('accountId',accountId);
+    }
+
     ref.current.close()
   }
+  
+// renders
+const renderBackdrop = useCallback(
+  (props) => (
+    <BottomSheetBackdrop
+      {...props}
+      disappearsOnIndex={-1}
+      appearsOnIndex={0}
+      opacity={0.5}
+    />
+  ),
+  []
+);
 
   return (
     <BottomSheet
@@ -28,6 +49,7 @@ const AccountBottomSheet = ({open, setOpen, accounts, selectedAccount,setselecte
       index={open ? 0 : -1}
       enablePanDownToClose={true}
       maxDynamicContentSize={false}
+      backdropComponent={renderBackdrop}
       >
       
       <BottomSheetFlatList

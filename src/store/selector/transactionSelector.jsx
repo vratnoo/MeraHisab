@@ -31,7 +31,7 @@ export const selectTotalExpense = createSelector([fetchTransaction,selectSelecte
 
   export const selectBalance = createSelector(
     [selectTotalIncome, selectTotalExpense],
-    (income, expenses) => income - expenses,
+    (income, expenses) => parseInt(income) - parseInt(expenses),
   );
 
 
@@ -106,7 +106,7 @@ export const selectFilteredTransactionByaccount = (accountId)=>createSelector(
     console.log("month here ",selectedMonth)
     const filteredTransactions = filterTransactions(transactions,selectedMonth) 
     console.log('filtred transaction are here',filteredTransactions)
-    const filteredTransactionsByAccount = filteredTransactions.filter((item)=>item.accountId === accountId)
+    const filteredTransactionsByAccount = filteredTransactions.filter((item)=>item.accountId === accountId || item.toAccountId === accountId)
     const sortedTransactions = [...filteredTransactionsByAccount].sort((a, b) => new Date(b.date) - new Date(a.date));
     return groupTransactionsByDate(sortedTransactions);
     
@@ -144,39 +144,128 @@ export const selectTotalExpenseByAccount = (accountId) => createSelector(
 );
 
 
+// export const selectTotalByAccount = (accountId) => createSelector(
+//   [fetchTransaction, selectSelectedMonth],
+//   (transactions, selectedMonth) => {
+//     const filteredTransactions = filterTransactions(transactions, selectedMonth);
+//     const accountFilteredTransactions = accountId 
+//       ? filteredTransactions.filter(transaction => transaction.accountId === accountId)
+//       : filteredTransactions;
+
+//     return accountFilteredTransactions.reduce(
+//       (total, transaction) => transaction.type === transType.EXPENSE ? total + parseInt(transaction.amount) : total,
+//       0
+//     );
+//   }
+// );
+export const selectTotalByAccount = (accountId) => createSelector(
+  [fetchTransaction, selectSelectedMonth],
+  (transactions, selectedMonth) => {
+    const filteredTransactions = filterTransactions(transactions, selectedMonth);
+    const accountFilteredTransactions = accountId 
+      ? filteredTransactions.filter(transaction => transaction.accountId === accountId || transaction.toAccountId === accountId)
+      : filteredTransactions;
+
+    return accountFilteredTransactions.reduce(
+      (total, transaction) => {
+        if (transaction.type === transType.INCOME) {
+          return total + parseInt(transaction.amount);
+        } else if (transaction.type === transType.EXPENSE) {
+          return total - parseInt(transaction.amount);
+        } else if (transaction.type === transType.TRANSFER) {
+          if (transaction.accountId === accountId) {
+            return total - parseInt(transaction.amount);
+          } else if (transaction.toAccountId === accountId) {
+            return total + parseInt(transaction.amount);
+          }
+        }
+        return total;
+      },
+      0
+    );
+  }
+);
+
+
+
+// const groupTransactionsByAccount = (transactions) => {
+//   const accountSummary =  transactions.reduce((acc, transaction) => {
+
+//     const {accountId,type,amount} = transaction
+      
+//       if(!acc[accountId]){
+//         acc[accountId] = {
+//           accountId,
+//           total:0,
+//           totalIncome : 0,
+//           totalExpense: 0
+//         }
+//       }
+
+//       if(type === transType.INCOME){
+//         acc[accountId].total += parseInt(amount);
+//         acc[accountId].totalIncome+=parseInt(amount)
+//       }else if(type === transType.EXPENSE){
+//         acc[accountId].total -= parseInt(amount);
+//         acc[accountId].totalExpense+=parseInt(amount)
+//       }
+
+//       return acc
+
+
+//   }, {});
+
+//   console.log('here ',accountSummary)
+
+//    return accountSummary
+// };
 
 const groupTransactionsByAccount = (transactions) => {
-  const accountSummary =  transactions.reduce((acc, transaction) => {
+  // console.log('fresh transactions', transactions)
+  const accountSummary = transactions.reduce((acc, transaction) => {
+    const { accountId, type, amount,toAccountId } = transaction;
 
-    const {accountId,type,amount} = transaction
-      
-      if(!acc[accountId]){
-        acc[accountId] = {
-          accountId,
-          total:0,
-          totalIncome : 0,
-          totalExpense: 0
-        }
+    if (!acc[accountId]) {
+      acc[accountId] = {
+        accountId,
+        total: 0,
+        totalIncome: 0,
+        totalExpense: 0,
+      };
+    }
+
+    if(type === transType.TRANSFER){
+      if (!acc[toAccountId]) {
+        acc[toAccountId] = {
+          accountId:toAccountId,
+          total: 0,
+          totalIncome: 0,
+          totalExpense: 0,
+        };
       }
+    }
 
-      if(type === transType.INCOME){
-        acc[accountId].total += parseInt(amount);
-        acc[accountId].totalIncome+=parseInt(amount)
-      }else if(type === transType.EXPENSE){
+    if (type === transType.INCOME) {
+      acc[accountId].total += parseInt(amount);
+      acc[accountId].totalIncome += parseInt(amount);
+    } else if (type === transType.EXPENSE) {
+      acc[accountId].total -= parseInt(amount);
+      acc[accountId].totalExpense += parseInt(amount);
+    } else if (type === transType.TRANSFER) {
+      console.log('transfer transaction', transaction)
+      // Consider transfer type
         acc[accountId].total -= parseInt(amount);
-        acc[accountId].totalExpense+=parseInt(amount)
-      }
+        acc[toAccountId].total += parseInt(amount);
+    }
 
-      return acc
+    return acc;
 
-
+    console.log('account ssss ', accountSummary);
   }, {});
 
-  console.log('here ',accountSummary)
 
-   return accountSummary
+  return accountSummary;
 };
-
 
 
 export const selectGroupTransactionsByAccount = createSelector(

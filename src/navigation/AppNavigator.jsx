@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {BottomNavigation, Text} from 'react-native-paper';
 import TransactionForm from '../screens/Addtransaction';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, useNavigation, useRoute} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import AddCategoryForm from '../screens/Addcategory';
 import AddTransactionForm from '../screens/Addtransaction';
@@ -16,6 +16,7 @@ import { useDispatch } from 'react-redux';
 import Home from '../screens/Home';
 import Categories from '../screens/Categories';
 import BottomSheetTest from '../screens/BottomSheetTest';
+import { add } from 'date-fns';
 
 
 
@@ -23,6 +24,8 @@ import BottomSheetTest from '../screens/BottomSheetTest';
 const Main = ({setTabIndex}) => {
   const [index, setIndex] = React.useState(0);
   const dispatch = useDispatch()
+  const navigation = useNavigation();
+  const route  = useRoute()
 
   const [routes] = React.useState([
     {key: 'home', title: 'Home', focusedIcon: 'home', unfocusedIcon: 'home'},
@@ -40,16 +43,14 @@ const Main = ({setTabIndex}) => {
     home: Home,
     transaction: ShowTransaction,
     account: ViewAccounts,
-    addTransaction: props => (
-      <AddTransactionForm {...props} setTabIndex={setIndex} />
-    ),
+    addTransaction: AddTransactionForm,
   });
 
   React.useEffect(() => {
-    if (setTabIndex) {
-      setTabIndex(setIndex);
+    if (route.params?.initial) {
+      setIndex(route.params.initial);
     }
-  }, [setTabIndex]);
+  }, [route.params?.initial]);
 
   React.useEffect(() => {
     dispatch(fetchAccountsThunk());

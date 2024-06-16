@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {View, Text,TextInput as RNTextInput} from 'react-native';
 import {Button, TextInput,Appbar} from 'react-native-paper';
-import BottomSheet, {BottomSheetView} from '@gorhom/bottom-sheet';
 import {Picker} from '@react-native-picker/picker';
 import {useNavigation,useRoute} from '@react-navigation/native';
 
@@ -25,7 +24,7 @@ function AppHeader({isEditing}) {
   const navigation = useNavigation();
   return (
     <ThemedAppBar>
-      <Appbar.BackAction onPress={() => navigation.goBack()} />
+      <Appbar.BackAction onPress={() => navigation.canGoBack && navigation.goBack()} />
       <Appbar.Content title= {isEditing?"Edit Transaction":"Add Transaction"} />
     </ThemedAppBar>
 
@@ -44,6 +43,7 @@ const AddTransactionForm = ({setTabIndex}) => {
   const [openCategoriesModal, setopenCategoriesModal] = useState(false);
 
   const [openAccountModal, setopenAccountModal] = useState(false);
+  const [openToAccountModal, setopenToAccountModal] = useState(false);
   const [openCalculatorModal, setopenCalculatorModal] = useState(false);
 
   const initialState = transaction ? {
@@ -51,6 +51,7 @@ const AddTransactionForm = ({setTabIndex}) => {
     date: transaction.date,
     amount: transaction.amount,
     accountId: transaction.accountId,
+    toAccountId: transaction.toAccountId || null,
     categoryId: transaction.categoryId,
     notes: transaction.notes,
     desc: transaction.desc,
@@ -59,6 +60,7 @@ const AddTransactionForm = ({setTabIndex}) => {
     date: todayDate(),
     amount: 0,
     accountId: accounts[0] ? accounts[0].id : null,
+    toAccountId: null,
     categoryId: null,
     notes: '',
     desc: '',
@@ -70,13 +72,23 @@ const AddTransactionForm = ({setTabIndex}) => {
       setDateTime(new Date(transaction.date))
     }
   },[])
-  const validationSchema = Yup.object({
-    notes: Yup.string().required('Category name is required'),
-    categoryId: Yup.string().required('Category name is required'),
-    accountId: Yup.string().required('Category name is required'),
-    amount: Yup.number(),
-    desc: Yup.string().required('Category name is required'),
-  });
+
+ const validationSchema = Yup.object({
+  notes: Yup.string().required('Transaction name is required'),
+  categoryId:  Yup.string().when('type', {
+    is: (value) => value === transType.TRANSFER, // Corrected condition
+    then: ()=> Yup.string().notRequired(),
+    otherwise: ()=> Yup.string().required('Category name is required'),
+  }),
+  accountId: Yup.string().required('Account name is required'),
+  toAccountId: Yup.string().when('type', {
+    is: (value) => value === transType.TRANSFER, // Corrected condition
+    then: ()=> Yup.string().required('To Account name is required'),
+    otherwise: ()=> Yup.string().notRequired(),
+  }),
+  amount: Yup.number().required('Amount is required'),
+  desc: Yup.string().required('Category name is required'),
+});
 
   const formik = useFormik({
     initialValues: initialState,
@@ -138,7 +150,7 @@ const AddTransactionForm = ({setTabIndex}) => {
     showMode('time');
   };
 
-  const filteredCategories = categories.filter(
+  const filteredCategories =  categories.filter(
     category => category.type === formik.values.type,
   );
 
@@ -147,9 +159,14 @@ const AddTransactionForm = ({setTabIndex}) => {
       setopenCategoriesModal(true)
   }
 
+ 
   const handleOpenAccountModal = ()=>{
-    console.log("open Accoutn Model")
+    console.log("open Account Model")
     setopenAccountModal(true)
+}
+  const handleOpenToAccountModal = ()=>{
+    console.log("open To Accoutn Model")
+    setopenToAccountModal(true)
 }
 
   return (
@@ -172,6 +189,15 @@ const AddTransactionForm = ({setTabIndex}) => {
             }
             onPress={() => formik.setFieldValue('type', transType.EXPENSE)}>
           Expense
+        </Button>
+        <Button
+          icon="arrow-left-right"
+          style={{borderWidth: 1, borderColor: 'orange'}}
+          mode={
+            formik.values.type == transType.TRANSFER ? 'contained' : 'outlined'
+            }
+            onPress={() => formik.setFieldValue('type', transType.TRANSFER)}>
+          Transfer
         </Button>
       </View>
 
@@ -219,59 +245,67 @@ const AddTransactionForm = ({setTabIndex}) => {
           ? formik.errors.categoryId
           : null}
       </Text>
-      <Button mode='outlined' onPress={()=>handleOpenCategoriesModal()}>{formik.values.categoryId ? filteredCategories.find(item => item.id === formik.values.categoryId)?.name : 'Select Category'}</Button>
 
-      <Picker
-        selectedValue={formik.values.categoryId}
-        onValueChange={(itemValue, itemIndex) =>
-          // setFormData(state => ({...state, categoryId: itemValue}))
-          formik.setFieldValue('categoryId', itemValue)
-          }>
-        <Picker.Item key={null} label={'Not Selected'} value={null} />
-        {filteredCategories.map(item => (
-          <Picker.Item key={item.id} label={item.name} value={item.id} />
-          ))}
-      </Picker>
+      {
+        formik.values.type !== transType.TRANSFER  && (<Button mode='outlined' onPress={()=>handleOpenCategoriesModal()}>{formik.values.categoryId ? filteredCategories.find(item => item.id === formik.values.categoryId)?.name : 'Select Category'}</Button>)
+      }
+     
+      <Text>
 
-      <Text>Accounts</Text>
-      <Picker
-        selectedValue={formik.values.accountId}
-        onValueChange={(itemValue, itemIndex) =>
-          // setFormData(state => ({...state, accountType: itemValue}))
-          formik.setFieldValue('accountId', itemValue)
-          }>
+        { formik.values.type === transType.TRANSFER ? 'From Accounts' : 'Account'}
+      </Text>
 
-       {accounts.map(item => (
-         <Picker.Item key={item.id} label={item.name} value={item.id} />
-         ))}
-      </Picker>
 
+      
       <Button mode='outlined' onPress={()=>handleOpenAccountModal()}>{formik.values.accountId ? accounts.find(item => item.id === formik.values.accountId)?.name : 'Select Account'}</Button>
-        
-      <TouchableOpacity 
-      onPress={()=>setopenCalculatorModal(true)}
-      >
+      <Text
+        style={{
+          color:
+          formik.errors.toAccountId && formik.touched.toAccountId
+          ? 'red'
+          : null,
+          }}>
+            {formik.values.type === transType.TRANSFER ? 'To Accounts' : null}
+       
+        {formik.errors.toAccountId && formik.touched.toAccountId
+          ? formik.errors.toAccountId
+          : null}
+      </Text>
 
-      <TextInput
-        name="amount"
-        keyboardType="numeric"
-        placeholder="Amount "
-        editable={false}
-        value={formik.values.amount}
-        onBlur={formik.handleBlur('amount')}
-        onChangeText={formik.handleChange('amount')}
-        error={formik.errors.amount && formik.touched.amount}
-        />
+       
+       
+        {
+          formik.values.type === transType.TRANSFER ? 
+          <View>
+             <Text>To Accounts</Text>
+            <Button mode='outlined' onPress={()=>handleOpenToAccountModal()}>{formik.values.toAccountId ? accounts.find(item => item.id === formik.values.toAccountId)?.name : 'Select Account'}</Button>
+            
+            </View>:null
+        }
+   
 
-        </TouchableOpacity>
+    
 
-        <TouchableOpacity onPress={() =>setopenCalculatorModal(true)} activeOpacity={1}>
+    
+{/*         
+              <TextInput
+                name="amount"
+                keyboardType="numeric"
+                placeholder="Amount "
+                value={formik.values.amount}
+                onBlur={formik.handleBlur('amount')}
+                onChangeText={formik.handleChange('amount')}
+                error={formik.errors.amount && formik.touched.amount}
+                /> */}
+
+        <TouchableOpacity style={{marginBottom:10}} onPress={() =>setopenCalculatorModal(true)} activeOpacity={1}>
           <View pointerEvents="none">
-              <RNTextInput
-                value={formik.values}
-                editable={false} 
+              <TextInput
+                value={formik.values.amount.toString()}
+                editable={false}
+                />
                 
-              />
+                
 
           </View>
       </TouchableOpacity>
@@ -292,7 +326,6 @@ const AddTransactionForm = ({setTabIndex}) => {
         Save
       </Button>
 
-      {/* <MyBottomSheet/> */}
       <Button style={{marginTop: 10}} onPress={deleteTransaction}>
         Delete Entry
       </Button>
@@ -306,8 +339,9 @@ const AddTransactionForm = ({setTabIndex}) => {
     </View>
 
     <CategoryBottomSheet open={openCategoriesModal} setOpen={setopenCategoriesModal} categories={filteredCategories} selectedCategory={formik.values.categoryId} setselectedCategory={formik.setFieldValue}/>
-    <AccountBottomSheet open={openAccountModal} setOpen={setopenAccountModal} accounts={accounts} selectedAccount={formik.values.accountId} setselectedAccount={formik.setFieldValue}/>
-    <Calculator  open={openCalculatorModal} setOpen={setopenCalculatorModal}/>
+    <AccountBottomSheet type = {transType.INCOME} open={openAccountModal} setOpen={setopenAccountModal} accounts={accounts} selectedAccount={formik.values.accountId} setselectedAccount={formik.setFieldValue}/>
+    <AccountBottomSheet type = {transType.TRANSFER} open={openToAccountModal} setOpen={setopenToAccountModal} accounts={accounts} selectedAccount={formik.values.toAccountId} setselectedAccount={formik.setFieldValue}/>
+    <Calculator  initial={formik.values.amount}  open={openCalculatorModal}  setOpen={setopenCalculatorModal} setResult={formik.setFieldValue}/>
 </View>
   );
 };

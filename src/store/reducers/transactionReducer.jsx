@@ -4,7 +4,8 @@ import { todayDate } from "../../helper/utility";
 
 export const transType = {
     INCOME:'income',
-    EXPENSE:'expense'
+    EXPENSE:'expense',
+    TRANSFER:'transfer'
 }
 
 

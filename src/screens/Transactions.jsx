@@ -29,10 +29,11 @@ const ShowTransaction = ()=>{
   const groupedTransactions = useSelector(selectGroupedTransactions);
   const totalIncome = useSelector(selectTotalIncome);
   const totalExpense = useSelector(selectTotalExpense);
+  const total = useSelector(selectBalance);
   const dispatch = useDispatch()
   const navigation  = useNavigation()
 
-  const transactionProps = { groupedTransactions, totalIncome, totalExpense };
+  const transactionProps = { groupedTransactions, totalIncome, totalExpense,total};
   
 
 
@@ -54,7 +55,7 @@ export const Transactions = ({transactionProps}) => {
   const accounts = useSelector(fetchAccounts);
   const selectedDate = useSelector(selectSelectedMonth)
   const dispatch = useDispatch()
-  const {groupedTransactions,totalIncome,totalExpense} = transactionProps
+  const {groupedTransactions,totalIncome,totalExpense,total} = transactionProps
   
 
   const balance = useSelector(selectBalance);
@@ -128,18 +129,33 @@ export const Transactions = ({transactionProps}) => {
         <View>
           <Text style={{color: 'gray'}}>Category</Text>
           <Text style={{fontWeight: '400', fontSize: 15}}>
-            {categories.map(category =>
+            {(item.transaction.categoryId !== null) ? categories.map(category =>
               category.id === item.transaction.categoryId ? category.name : '',
-            )}
+            ) : '<-Transfer->'}
           </Text>
         </View>
         <View>
           <Text style={{fontWeight: '800'}}>{item.transaction.notes}</Text>
+          <View>
           <Text style={{color: 'gray'}}>
-            {accounts.map(account =>
+            { accounts.map(account =>
               account.id === item.transaction.accountId ? account.name : '',
             )}
+
+            {
+              (item.transaction.type == transType.TRANSFER) && " -> "
+            }
+
+            {(item.transaction.type == transType.TRANSFER) && accounts.map(account =>
+              account.id === item.transaction.toAccountId ? account.name : '',
+            )
+            }
+
           </Text>
+
+          </View>
+          
+          
         </View>
         <View style={{flexDirection: 'column', alignItems: 'center'}}>
           <Text
@@ -190,7 +206,7 @@ export const Transactions = ({transactionProps}) => {
         <View
           style={{flexDirection: 'column', alignItems: 'center', margin: 10}}>
           <Text style={{fontSize: 20, color: 'black'}}>Total</Text>
-          <Text style={{fontSize: 20, margin: 10}}>{parseInt(totalIncome)- parseInt(totalExpense)}</Text>
+          <Text style={{fontSize: 20, margin: 10}}>{parseInt(total)}</Text>
         </View>
       </View>
 

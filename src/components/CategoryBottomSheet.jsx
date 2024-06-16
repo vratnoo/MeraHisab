@@ -1,6 +1,6 @@
 import {View, Text, StyleSheet} from 'react-native';
 import React, {useRef, useCallback} from 'react';
-import BottomSheet, {BottomSheetView} from '@gorhom/bottom-sheet';
+import BottomSheet, {BottomSheetView,BottomSheetBackdrop} from '@gorhom/bottom-sheet';
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import { Button } from 'react-native-paper';
 
@@ -21,13 +21,28 @@ const CategoryBottomSheet = ({open, setOpen, categories, selectedCategory,setsel
     ref.current.close()
 
   }
+
+  const renderBackdrop  = useCallback(
+    (props) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.1}
+      />
+    ),
+    []    
+  )
   return (
     <BottomSheet
       ref={ref}
       onChange={handleSheetChange}
       snapPoints={[500, 500]}
       index={open ? 0 : -1}
-      enablePanDownToClose={true}>
+      enablePanDownToClose={true}
+      backdropComponent = {renderBackdrop}
+      >
+   
       <BottomSheetFlatList
        style={styles.categoryContainer}
         data={categories}

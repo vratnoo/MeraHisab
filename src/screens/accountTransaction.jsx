@@ -5,7 +5,7 @@ import { Text,Appbar } from 'react-native-paper';
 import { useSelector } from 'react-redux';
 import { fetchAccounts } from '../store/reducers/accountReducer';
 import { Transactions } from './Transactions';
-import { selectFilteredTransactionByaccount, selectGroupTransactionsByAccount, selectTotalExpense, selectTotalExpenseByAccount, selectTotalIncome, selectTotalIncomeByAccount } from '../store/selector/transactionSelector';
+import { selectFilteredTransactionByaccount, selectGroupTransactionsByAccount, selectTotalByAccount, selectTotalExpense, selectTotalExpenseByAccount, selectTotalIncome, selectTotalIncomeByAccount } from '../store/selector/transactionSelector';
 import ThemedAppBar from '../components/ThemedAppBar';
 function AppHeader({account}) {
     const navigation = useNavigation()
@@ -27,8 +27,10 @@ const AccountTransaction = ()=>{
     const groupedTransactions = useSelector(selectFilteredTransactionByaccount(id))
     const totalIncome = useSelector(selectTotalIncomeByAccount(id));
     const totalExpense = useSelector(selectTotalExpenseByAccount(id));
+    const total = useSelector(selectTotalByAccount(id));
+
   
-    const transactionProps = { groupedTransactions, totalIncome, totalExpense };
+    const transactionProps = { groupedTransactions, totalIncome, totalExpense,total };
 
     const account = accounts.find((item)=>item.id===id)
     console.log(account)
