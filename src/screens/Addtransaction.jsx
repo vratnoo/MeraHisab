@@ -7,7 +7,7 @@ import {useNavigation,useRoute} from '@react-navigation/native';
 import {addTransactionThunk, updateTransactionThunk,deleteTransactionThunk} from '../store/actions/transactionActions';
 import {useDispatch, useSelector} from 'react-redux';
 import {transType} from '../store/reducers/transactionReducer';
-import {todayDate} from '../helper/utility';
+import {getFormatedDate, todayDate} from '../helper/utility';
 import * as Yup from 'yup';
 import {useFormik} from 'formik';
 import {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
@@ -18,6 +18,8 @@ import CategoryBottomSheet from '../components/CategoryBottomSheet';
 import AccountBottomSheet from '../components/AccountBottomSheet';
 import Calculator from '../components/Calculator';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { format, formatDistance, formatRelative, subDays } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns/formatDistanceToNow';
 
 
 function AppHeader({isEditing}) {
@@ -44,7 +46,7 @@ const AddTransactionForm = ({setTabIndex}) => {
 
   const [openAccountModal, setopenAccountModal] = useState(false);
   const [openToAccountModal, setopenToAccountModal] = useState(false);
-  const [openCalculatorModal, setopenCalculatorModal] = useState(false);
+  const [openCalculatorModal, setopenCalculatorModal] = useState(true);
 
   const initialState = transaction ? {
     type: transaction.type,
@@ -173,8 +175,9 @@ const AddTransactionForm = ({setTabIndex}) => {
     <View style={{flex: 1}}>
       <AppHeader isEditing={transaction}/>
     <View style={{padding: 20}}>
-      <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+      <View style={{flexDirection: 'row', alignSelf: 'center'}}>
         <Button
+          style={{marginRight: 10}}
           icon="arrow-bottom-left-thin"
           mode={
             formik.values.type == transType.INCOME ? 'contained' : 'outlined'
@@ -183,6 +186,7 @@ const AddTransactionForm = ({setTabIndex}) => {
           INCOME
         </Button>
         <Button
+        style={{marginRight: 10}}
           icon="arrow-top-right"
           mode={
             formik.values.type == transType.EXPENSE ? 'contained' : 'outlined'
@@ -201,16 +205,16 @@ const AddTransactionForm = ({setTabIndex}) => {
         </Button>
       </View>
 
-      <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+      <View style={{flexDirection: 'row',alignSelf:'center',marginVertical:10}}>
         <Button
-          style={{borderWidth: 1, borderColor: 'blue'}}
-          value
+          mode='elevated'
+          style={{marginRight: 10}}
           onPress={showDatepicker}
           title="Show date picker!">
-          {dateTime.toLocaleDateString('en-IN')}
+          {getFormatedDate(dateTime)}
         </Button>
         <Button
-          style={{borderWidth: 1, borderColor: 'blue'}}
+          mode='elevated'
           onPress={showTimepicker}
           title="Show time picker!">
           {dateTime.toLocaleTimeString('en-IN', {
@@ -220,7 +224,7 @@ const AddTransactionForm = ({setTabIndex}) => {
             })}
         </Button>
       </View>
-      <Text>Date ISO STring :{dateTime.toLocaleString('en-IN')}</Text>
+      {/* <Text>Date ISO STring :{dateTime.toLocaleString('en-IN')}</Text> */}
 
       <TextInput
         name="name"
@@ -321,13 +325,10 @@ const AddTransactionForm = ({setTabIndex}) => {
 
       <Button
         icon="content-save-check"
+        style={{marginVertical: 10}}
         mode="contained"
         onPress={formik.handleSubmit}>
         Save
-      </Button>
-
-      <Button style={{marginTop: 10}} onPress={deleteTransaction}>
-        Delete Entry
       </Button>
 
       <Button
@@ -336,7 +337,15 @@ const AddTransactionForm = ({setTabIndex}) => {
         onPress={() => navigation.navigate('categories')}>
         Categories
       </Button>
+      
+      {transaction && <Button icon='delete-forever' style={{marginVertical: 10}} mode='contained-tonal' buttonColor='pink' onPress={deleteTransaction}>
+        Delete Entry
+      </Button>}
     </View>
+
+     
+
+    
 
     <CategoryBottomSheet open={openCategoriesModal} setOpen={setopenCategoriesModal} categories={filteredCategories} selectedCategory={formik.values.categoryId} setselectedCategory={formik.setFieldValue}/>
     <AccountBottomSheet type = {transType.INCOME} open={openAccountModal} setOpen={setopenAccountModal} accounts={accounts} selectedAccount={formik.values.accountId} setselectedAccount={formik.setFieldValue}/>
