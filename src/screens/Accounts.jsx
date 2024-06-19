@@ -22,6 +22,7 @@ import {useNavigation} from '@react-navigation/native';
 import MonthPicker from 'react-native-month-year-picker';
 import {setSelectedMonth} from '../store/reducers/monthReducer';
 import {fetchAccountsThunk} from '../store/actions/accountActions';
+import RenderTimer from '../helper/renderTimer';
 
 const ViewAccounts = () => {
   const navigation = useNavigation();
@@ -45,6 +46,7 @@ const ViewAccounts = () => {
 
 
   return (
+    <RenderTimer screenName="ViewAccounts">
     <View style={{flex: 1, paddingHorizontal: 15}}>
       <Text> Account here</Text>
       <View>
@@ -91,6 +93,7 @@ const ViewAccounts = () => {
         onPress={() => navigation.navigate('addAccounts')}
       />
     </View>
+    </RenderTimer>
   );
 };
 

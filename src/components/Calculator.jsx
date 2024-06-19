@@ -1,13 +1,12 @@
-import {View, StyleSheet} from 'react-native';
-import React, {useRef,useState, useCallback} from 'react';
-import BottomSheet, {BottomSheetView,BottomSheetBackdrop} from '@gorhom/bottom-sheet';
-import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
+import { View, StyleSheet } from 'react-native';
+import React, { useRef, useState, useCallback, memo } from 'react';
+import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { Button, Text, TextInput, Provider as PaperProvider, useTheme } from 'react-native-paper';
 
-const CalculatorBottomSheet = ({initial,open, setOpen, setResult}) => {
+const CalculatorBottomSheet = memo(({ initial, open, setOpen, setResult }) => {
   const ref = useRef(null);
   const [input, setInput] = useState(initial);
-  const theme  =  useTheme()
+  const theme = useTheme();
 
   const handleSheetChange = useCallback(index => {
     console.log('handleSheetChange', index);
@@ -15,9 +14,9 @@ const CalculatorBottomSheet = ({initial,open, setOpen, setResult}) => {
     if (index === -1) {
       setOpen(false);
     }
-  });
+  }, [setOpen]);
 
-  const handlePress = (value) => {
+  const handlePress = useCallback((value) => {
     if (value === '=') {
       try {
         setInput(eval(input).toString());
@@ -26,26 +25,30 @@ const CalculatorBottomSheet = ({initial,open, setOpen, setResult}) => {
       }
     } else if (value === 'C') {
       setInput('');
-    }else if (value === 'DEL') {
+    } else if (value === 'DEL') {
       setInput(input.slice(0, -1));
-    }else if (value === '✓') {
+    } else if (value === '✓') {
       try {
         const output = eval(input);
         setInput(output.toString());
-        setResult('amount',output)
-        ref.current.close()
+        setResult(output);
+        ref.current.close();
       } catch (e) {
         setInput('Error');
       }
-      
-    }
-    else {
-      setInput((prev) => prev + value);
-    }
-  };
+    } else {
+      setInput((prev) => {
+        if(prev === '0' || prev === 0){
+          return value;
+        }else{
+          return prev + value;
+        }
+      });
 
+    }
+  }, [input, setResult]);
 
-  const renderBackdrop  = useCallback(
+  const renderBackdrop = useCallback(
     (props) => (
       <BottomSheetBackdrop
         {...props}
@@ -54,64 +57,53 @@ const CalculatorBottomSheet = ({initial,open, setOpen, setResult}) => {
         opacity={0.1}
       />
     ),
-    []    
-  )
+    []
+  );
+
   return (
     <BottomSheet
       ref={ref}
-      backgroundStyle={{backgroundColor:theme.colors.surface}}
-      handleIndicatorStyle={{backgroundColor:theme.colors.primary}}
+      backgroundStyle={{ backgroundColor: theme.colors.surface }}
+      handleIndicatorStyle={{ backgroundColor: theme.colors.primary }}
       onChange={handleSheetChange}
       snapPoints={[450]}
       index={open ? 0 : -1}
       enablePanDownToClose={true}
-      backdropComponent = {renderBackdrop}
-      >
-        <View style={styles.container}>
+      backdropComponent={renderBackdrop}
+    >
+      <View style={styles.container}>
         <TextInput
           mode="outlined"
           label="Input"
-          value={'₹ '+input}
+          value={'₹ ' + input}
           style={styles.input}
           disabled
           error={input === 'Error'}
-          textColor='green'
         />
-        <View style={styles.row}>
-          {[
-             { key: 'AC', value: 'C' },
-             { key: '÷', value: '/' },
-             { key: 'X', value: '*' },
-             { key: 'DEL', value: 'DEL' },
-          ].map((item) => (
-            <Button key={item.key} mode="contained" onPress={() => handlePress(item.value)} style={styles.button}>{item.key}</Button>
-          ))}
-        </View>
-        <View style={styles.row}>
-          {['7', '8', '9', '*'].map((val) => (
-            <Button key={val} mode="contained" onPress={() => handlePress(val)} style={styles.button}>{val}</Button>
-          ))}
-        </View>
-        <View style={styles.row}>
-          {['4', '5', '6', '-'].map((val) => (
-            <Button key={val} mode="contained" onPress={() => handlePress(val)} style={styles.button}>{val}</Button>
-          ))}
-        </View>
-        <View style={styles.row}>
-          {['1', '2', '3', '+'].map((val) => (
-            <Button key={val} mode="contained" onPress={() => handlePress(val)} style={styles.button}>{val}</Button>
-          ))}
-        </View>
-        <View style={styles.row}>
-          {['0', '.', '=','✓'].map((val) => (
-            <Button key={val} mode="contained-tonal" onPress={() => handlePress(val)} style={styles.button}>{val}</Button>
-          ))}
-        </View>
+        {[
+          [['AC', 'C'], ['÷', '/'], ['X', '*'], ['DEL', 'DEL']],
+          ['7', '8', '9', '*'],
+          ['4', '5', '6', '-'],
+          ['1', '2', '3', '+'],
+          ['0', '.', '=', '✓']
+        ].map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.row}>
+            {row.map((val, index) => (
+              <Button
+                key={index}
+                mode="contained"
+                onPress={() => handlePress(Array.isArray(val) ? val[1] : val)}
+                style={styles.button}
+              >
+                {Array.isArray(val) ? val[0] : val}
+              </Button>
+            ))}
+          </View>
+        ))}
       </View>
     </BottomSheet>
   );
-};
-
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -133,4 +125,5 @@ const styles = StyleSheet.create({
     margin: 5,
   },
 });
+
 export default CalculatorBottomSheet;

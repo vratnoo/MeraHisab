@@ -4,8 +4,7 @@ import AppNavigator from './src/navigation/AppNavigator'
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
 import { Provider } from "react-redux";
-import { PersistGate } from 'redux-persist/integration/react';
-import { store, persistor } from './src/store';
+import store from './src/store';
 
 import auth from '@react-native-firebase/auth';
 import Main from "./Main";
@@ -25,14 +24,13 @@ const App  = ()=>{
   return(
     <GestureHandlerRootView style={{flex:1}} >
     <Provider store={store}>
-       <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
+       
 
               <PaperProvider>
                   <Main/>
               </PaperProvider>
 
                
-       </PersistGate>
     </Provider>
     </GestureHandlerRootView>
 

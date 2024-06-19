@@ -22,6 +22,7 @@ import { setSelectedMonth } from '../store/reducers/monthReducer';
 import { fetchTransactionThunk } from '../store/actions/transactionActions';
 import { fetchAccountsThunk } from '../store/actions/accountActions';
 import { useNavigation } from '@react-navigation/native';
+import RenderTimer from '../helper/renderTimer';
 
 
 
@@ -179,6 +180,8 @@ export const Transactions = ({transactionProps}) => {
   };
 
   return (
+    <RenderTimer screenName='ShowTransaction'>
+
     <View style={{flex: 1, paddingHorizontal: 15,paddingBottom: 65}}>
       <View style={{flexDirection: 'row', justifyContent: 'center'}}>
         <View>
@@ -187,9 +190,9 @@ export const Transactions = ({transactionProps}) => {
       </Button>
       {showPicker && (
         <MonthPicker
-          onChange={onValueChange}
-          value={new Date(selectedDate)}
-          locale="en"
+        onChange={onValueChange}
+        value={new Date(selectedDate)}
+        locale="en"
         />)}
 
         </View>
@@ -215,9 +218,10 @@ export const Transactions = ({transactionProps}) => {
           data={flatListData}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
-        />
+          />
       </View>
     </View>
+</RenderTimer>
   );
 };
 
@@ -232,7 +236,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-
+  
 });
 
 export default ShowTransaction;
