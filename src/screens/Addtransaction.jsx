@@ -91,11 +91,12 @@ const AddTransactionForm = ({ setTabIndex }) => {
     validationSchema,
     onSubmit: (values, { resetForm }) => {
       if (transaction) {
-        dispatch(updateTransactionThunk({ ...values, date: dateTime.toISOString(), id: transaction.id,type: type}));
+        dispatch(updateTransactionThunk({ ...values, date: dateTime.toISOString(), id: transaction.id,type: type,amount:amount}));
       } else {
-        dispatch(addTransactionThunk({ ...values, date: dateTime.toISOString(),type: type}));
+        dispatch(addTransactionThunk({ ...values, date: dateTime.toISOString(),type: type,amount:amount}));
       }
       resetForm();
+      setAmount(0);
       navigation.navigate('Main');
     },
   });
@@ -235,7 +236,6 @@ const AddTransactionForm = ({ setTabIndex }) => {
             name="name"
             style={{ marginVertical: 10 }}
             label={'Transaction Name'}
-            mode="outlined"
             value={formik.values.notes}
             onBlur={formik.handleBlur('notes')}
             onChangeText={formik.handleChange('notes')}
@@ -270,7 +270,7 @@ const AddTransactionForm = ({ setTabIndex }) => {
         <CategoryBottomSheet open={openCategoriesModal} setOpen={setopenCategoriesModal} categories={filteredCategories} selectedCategory={formik.values.categoryId} setselectedCategory={formik.setFieldValue} />
         <AccountBottomSheet type={transType.INCOME} open={openAccountModal} setOpen={setopenAccountModal} accounts={accounts} selectedAccount={formik.values.accountId} setselectedAccount={formik.setFieldValue} />
         {(type===transType.TRANSFER) && <AccountBottomSheet type={transType.TRANSFER} open={openToAccountModal} setOpen={setopenToAccountModal} accounts={accounts} selectedAccount={formik.values.toAccountId} setselectedAccount={formik.setFieldValue} />}
-        <Calculator initial={amount} open={openCalculatorModal} setOpen={setopenCalculatorModal} setResult={handleCalculatorResult} />
+        <Calculator   initial={amount} open={openCalculatorModal} setOpen={setopenCalculatorModal} setResult={handleCalculatorResult} />
           
       </View>
     </RenderTimer>

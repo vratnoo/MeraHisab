@@ -91,7 +91,7 @@ const CalculatorBottomSheet = memo(({ initial, open, setOpen, setResult }) => {
             {row.map((val, index) => (
               <Button
                 key={index}
-                mode="contained"
+                mode="elevated"
                 onPress={() => handlePress(Array.isArray(val) ? val[1] : val)}
                 style={styles.button}
               >
@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
     paddingHorizontal: 20,
+    zIndex: 1000,
   },
   input: {
     marginBottom: 20,
@@ -118,11 +119,11 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   button: {
     flex: 1,
-    margin: 5,
+    margin: 1,
   },
 });
 

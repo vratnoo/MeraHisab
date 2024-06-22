@@ -1,7 +1,7 @@
 import { FlatList, StyleSheet, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Button, Text, FAB } from 'react-native-paper'
+import { Button, Text, FAB, useTheme } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
 import { transType } from '../store/reducers/transactionReducer'
 import { deleteCategoryThunk } from '../store/actions/categoryActions'
@@ -10,6 +10,7 @@ export default function Categories() {
     const categories = useSelector(state => state.categories.entities)
     const navigation = useNavigation()
     const [type, setType] = useState(transType.INCOME)
+    const  theme = useTheme()
     const dispatch = useDispatch()
     useEffect(() => {
         console.log(categories)
@@ -19,7 +20,7 @@ export default function Categories() {
         dispatch(deleteCategoryThunk(id))
     }
     return (
-        <View style={styles.container}>
+        <View style={[styles.container,{backgroundColor:theme.colors.background}]}>
             <View style={styles.buttonContainer}>
                 <Button
                     mode={type === transType.INCOME ? 'contained' : 'outlined'}
@@ -60,7 +61,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
-        backgroundColor: '#f5f5f5',
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -79,7 +79,6 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 5,
         borderRadius: 5,
-        backgroundColor: '#fff',
     },
     itemText: {
         flex: 1,

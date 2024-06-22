@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {View} from 'react-native';
-import {Button, TextInput} from 'react-native-paper';
+import {View,StyleSheet} from 'react-native';
+import {Button, Menu, TextInput, useTheme} from 'react-native-paper';
 import {Picker} from '@react-native-picker/picker';
 import * as Yup from 'yup';
 import {useFormik} from 'formik';
@@ -10,6 +10,7 @@ import { addCategoryThunk, updateCategoryThunk } from '../store/actions/category
 import {useDispatch} from 'react-redux';
 
 const AddCategoryForm = ({setTabIndex}) => {
+  const theme = useTheme();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const route = useRoute();
@@ -43,7 +44,7 @@ const AddCategoryForm = ({setTabIndex}) => {
   });
 
   return (
-    <View style={{padding: 20}}>
+    <View style={[styles.container,{backgroundColor:theme.colors.background}]}>
       <Picker
         selectedValue={formik.values.type}
         onValueChange={(itemValue) =>
@@ -52,6 +53,10 @@ const AddCategoryForm = ({setTabIndex}) => {
         <Picker.Item label="Income" value={transType.INCOME} />
         <Picker.Item label="Expense" value={transType.EXPENSE} />
       </Picker>
+      <Menu>
+        <Menu.Item onPress={() => setTabIndex(0)} title="Income" />
+        <Menu.Item onPress={() => setTabIndex(1)} title="Expense" />
+      </Menu>
 
       <TextInput
         name="name"
@@ -73,5 +78,46 @@ const AddCategoryForm = ({setTabIndex}) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+      flex: 1,
+      padding: 10,
+  },
+  buttonContainer: {
+      flexDirection: 'row',
+      alignSelf: 'center',
+      marginBottom: 20,
+  },
+  button: {
+      marginHorizontal: 5,
+  },
+  itemContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderColor: '#ddd',
+      borderWidth: 1,
+      padding: 10,
+      marginVertical: 5,
+      borderRadius: 5,
+  },
+  itemText: {
+      flex: 1,
+  },
+  editButton: {
+      marginRight: 10,
+  },
+  deleteButton: {
+      marginLeft: 10,
+  },
+  fab: {
+      position: 'absolute',
+      margin: 16,
+      right: 0,
+      bottom: 0,
+      backgroundColor: '#6200ee',
+  },
+})
 
 export default AddCategoryForm;

@@ -17,6 +17,7 @@ import Home from '../screens/Home';
 import Categories from '../screens/Categories';
 import BottomSheetTest from '../screens/BottomSheetTest';
 import { add } from 'date-fns';
+import Stats from '../screens/Stats';
 
 
 
@@ -30,12 +31,7 @@ const Main = ({setTabIndex}) => {
   const [routes] = React.useState([
     {key: 'home', title: 'Home', focusedIcon: 'home', unfocusedIcon: 'home'},
     {key: 'transaction', title: 'Transaction', focusedIcon: 'account-cash'},
-    {
-      key: 'addTransaction',
-      title: 'Add Transaction',
-      focusedIcon: 'plus',
-      unfocusedIcon: 'plus',
-    },
+    {key: 'Stats', title: 'Stats', focusedIcon: 'chart-box-outline'},
     {key: 'account', title: 'Account', focusedIcon: 'wallet'},
   ]);
 
@@ -43,7 +39,7 @@ const Main = ({setTabIndex}) => {
     home: Home,
     transaction: ShowTransaction,
     account: ViewAccounts,
-    addTransaction: AddTransactionForm,
+    Stats: Stats,
   });
 
   React.useEffect(() => {
@@ -89,8 +85,8 @@ const AppNavigator = () => {
           options={{
             headerShown: false,
           }}
-          
         />
+          
 
         <Stack.Screen
           name="transaction"
